@@ -4762,12 +4762,8 @@ decode QUADRANT default Unknown::unknown() {
                             uint32_t current_vl = VL;
                         }}, {{
                             Rd_ud = new_vl;
-                            VL = new_vl;
-                            Vtype = new_vtype;
-                            IsVset = true;
-                        }}, VSetiVliDeclare, VSetiVliBranchTarget
-                          , SimdConfigOp, IsUncondControl
-                          , IsDirectControl);
+                        }}, VSetiVliDeclare, None
+                          , SimdConfigOp);
                     }
                 }
             }

@@ -141,7 +141,35 @@ Decoder::decode(PCStateBase &_next_pc)
     emi.rv_type = static_cast<int>(next_pc.rvType());
     emi.enable_zcd = _enableZcd;
 
+    if (is_vsetivli(emi)) {
+        update_vl_vtype(emi);
+    }
+
     return decode(emi, next_pc.instAddr());
+}
+
+void
+Decoder::update_vl_vtype(ExtMachInst inst) {
+    uint32_t requested_vl = inst.uimm_vsetivli;
+    VTYPE requested_vtype = (VTYPE)inst.zimm_vsetivli;
+
+    if (vtype != requested_vtype) {
+        vtype = requested_vtype;
+
+        float vflmul = getVflmul(vtype.vlmul);
+        uint32_t sew = getSew(vtype.vsew);
+        vtype.vill =
+            !(vflmul >= 0.125 && vflmul <= 8) ||
+                (float)sew > std::min(vflmul, 1.0f) * (float)elen ||
+                bits(vtype, 62, 8) != 0;
+    }
+
+    if (vtype.vill) {
+        vtype = 1ULL << 63;
+        vl = 0;
+    } else {
+        vl = std::min(requested_vl, getVlmax(vtype, vlen));
+    }
 }
 
 } // namespace RiscvISA

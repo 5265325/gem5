@@ -82,6 +82,12 @@ class Decoder : public InstDecoder
 
     inline bool compressed(ExtMachInst inst) { return inst.quadRant < 0x3; }
 
+    inline bool is_vsetivli(ExtMachInst inst) {
+      return inst.opcode == 0x57 && inst.funct3 == 0x7 && inst.bit31_30 == 0x3;
+    }
+
+    void update_vl_vtype(ExtMachInst inst);
+
     //Use this to give data to the decoder. This should be used
     //when there is control flow.
     void moreBytes(const PCStateBase &pc, Addr fetchPC) override;
